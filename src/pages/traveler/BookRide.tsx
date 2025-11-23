@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Navigation } from "@/components/Navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -7,13 +7,15 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { CalendarIcon, Users } from "lucide-react";
+import { CalendarIcon, Users, AlertCircle } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { calculatePrice } from "@/lib/pricing";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 const locations = [
   "Puerto Princesa",
@@ -26,11 +28,11 @@ const locations = [
 ];
 
 const transportTypes = [
-  { value: "shared_van", label: "Shared Van", category: "land" },
-  { value: "private_van", label: "Private Van", category: "land" },
-  { value: "boat", label: "Island Hopping Boat", category: "sea" },
-  { value: "speedboat", label: "Speedboat", category: "sea" },
-  { value: "4x4", label: "4x4 Transfer", category: "land" },
+  { value: "shared_van", label: "Shared Van (₱750/person)", category: "land" },
+  { value: "private_van", label: "Private Van (Flat Rate)", category: "land" },
+  { value: "boat", label: "Shared Boat (₱3,500/person, min 8 pax)", category: "sea" },
+  { value: "speedboat", label: "Private Speedboat (₱30,000 flat)", category: "sea" },
+  { value: "4x4", label: "4x4 Transfer (Flat Rate)", category: "land" },
 ];
 
 const BookRide = () => {
@@ -47,6 +49,35 @@ const BookRide = () => {
     passengers: "1",
   });
 
+  const [priceEstimate, setPriceEstimate] = useState<number | null>(null);
+  const [priceError, setPriceError] = useState<string | null>(null);
+  const [priceWarning, setPriceWarning] = useState<string | null>(null);
+
+  // Calculate price whenever relevant fields change
+  useEffect(() => {
+    if (formData.pickup && formData.dropoff && formData.transportType && formData.passengers) {
+      const result = calculatePrice(
+        formData.transportType as any,
+        formData.pickup,
+        formData.dropoff,
+        parseInt(formData.passengers)
+      );
+
+      if (result.error) {
+        setPriceError(result.error);
+        setPriceEstimate(null);
+      } else {
+        setPriceError(null);
+        setPriceEstimate(result.total);
+        setPriceWarning(result.warning || null);
+      }
+    } else {
+      setPriceEstimate(null);
+      setPriceError(null);
+      setPriceWarning(null);
+    }
+  }, [formData.pickup, formData.dropoff, formData.transportType, formData.passengers]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -57,6 +88,16 @@ const BookRide = () => {
 
     if (!formData.pickup || !formData.dropoff || !formData.transportType || !formData.time) {
       toast.error("Please fill in all fields");
+      return;
+    }
+
+    if (priceError) {
+      toast.error(priceError);
+      return;
+    }
+
+    if (!priceEstimate) {
+      toast.error("Unable to calculate price. Please check your selections.");
       return;
     }
 
@@ -76,6 +117,7 @@ const BookRide = () => {
         passengers: parseInt(formData.passengers),
         status: "pending",
         payment_method: "cash",
+        price_estimate: priceEstimate,
       });
 
       if (error) throw error;
@@ -204,14 +246,37 @@ const BookRide = () => {
                       id="passengers"
                       type="number"
                       min="1"
-                      max="12"
+                      max="20"
                       value={formData.passengers}
                       onChange={(e) => setFormData({ ...formData, passengers: e.target.value })}
                     />
                   </div>
                 </div>
 
-                <Button type="submit" className="w-full" size="lg" disabled={loading}>
+                {priceError && (
+                  <Alert variant="destructive">
+                    <AlertCircle className="h-4 w-4" />
+                    <AlertDescription>{priceError}</AlertDescription>
+                  </Alert>
+                )}
+
+                {priceWarning && !priceError && (
+                  <Alert>
+                    <AlertCircle className="h-4 w-4" />
+                    <AlertDescription>{priceWarning}</AlertDescription>
+                  </Alert>
+                )}
+
+                {priceEstimate && !priceError && (
+                  <div className="p-4 bg-primary/10 rounded-lg border border-primary/20">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium">Estimated Price:</span>
+                      <span className="text-2xl font-bold">₱{priceEstimate.toLocaleString()}</span>
+                    </div>
+                  </div>
+                )}
+
+                <Button type="submit" className="w-full" size="lg" disabled={loading || !!priceError}>
                   {loading ? "Creating booking..." : "Find Available Operators"}
                 </Button>
               </form>
