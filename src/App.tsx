@@ -10,6 +10,7 @@ import Auth from "./pages/Auth";
 import BookRide from "./pages/traveler/BookRide";
 import MyTrips from "./pages/traveler/MyTrips";
 import OperatorDashboard from "./pages/operator/OperatorDashboard";
+import OperatorProfile from "./pages/operator/OperatorProfile";
 import VerifyBooking from "./pages/operator/VerifyBooking";
 import MyBookings from "./pages/operator/MyBookings";
 import AdminDashboard from "./pages/admin/AdminDashboard";
@@ -63,9 +64,17 @@ const App = () => (
               }
             />
             <Route
+              path="/operator/profile"
+              element={
+                <ProtectedRoute allowedRoles={["operator"]}>
+                  <OperatorProfile />
+                </ProtectedRoute>
+              }
+            />
+            <Route
               path="/operator/verify"
               element={
-                <ProtectedRoute>
+                <ProtectedRoute allowedRoles={["operator"]}>
                   <VerifyBooking />
                 </ProtectedRoute>
               }
@@ -73,7 +82,7 @@ const App = () => (
             <Route
               path="/operator/bookings"
               element={
-                <ProtectedRoute>
+                <ProtectedRoute allowedRoles={["operator"]}>
                   <MyBookings />
                 </ProtectedRoute>
               }
