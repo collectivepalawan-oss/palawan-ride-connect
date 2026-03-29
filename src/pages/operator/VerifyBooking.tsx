@@ -43,14 +43,14 @@ const VerifyBooking = () => {
 
     const { error } = await supabase
       .from("bookings")
-      .update({ status: "confirmed" })
+      .update({ status: "accepted" })
       .eq("id", booking.id);
 
     if (error) {
       toast.error("Failed to confirm booking");
     } else {
-      toast.success("Booking confirmed!");
-      setBooking({ ...booking, status: "confirmed" });
+      toast.success("Booking accepted!");
+      setBooking({ ...booking, status: "accepted" });
     }
   };
 
@@ -90,9 +90,9 @@ const VerifyBooking = () => {
                 <div className="border rounded-lg p-4 space-y-3">
                   <div className="flex items-center justify-between">
                     <h3 className="font-semibold text-lg">Booking Details</h3>
-                    {booking.status === "confirmed" ? (
+                    {booking.status === "accepted" ? (
                       <span className="text-green-600 flex items-center gap-1">
-                        <CheckCircle className="h-4 w-4" /> Confirmed
+                        <CheckCircle className="h-4 w-4" /> Accepted
                       </span>
                     ) : (
                       <span className="text-yellow-600">Pending</span>
@@ -109,10 +109,10 @@ const VerifyBooking = () => {
                     <p><strong>💰 Price:</strong> ₱{booking.price_estimate?.toLocaleString()}</p>
                   </div>
 
-                  {booking.status !== "confirmed" && (
+                  {booking.status !== "accepted" && (
                     <Button onClick={handleConfirm} className="w-full">
                       <CheckCircle className="h-4 w-4 mr-2" />
-                      Confirm Booking
+                      Accept Booking
                     </Button>
                   )}
                 </div>
