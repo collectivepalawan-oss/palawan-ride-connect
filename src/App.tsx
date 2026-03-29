@@ -10,6 +10,7 @@ import Auth from "./pages/Auth";
 import BookRide from "./pages/traveler/BookRide";
 import MyTrips from "./pages/traveler/MyTrips";
 import OperatorDashboard from "./pages/operator/OperatorDashboard";
+import VerifyBooking from "./pages/operator/VerifyBooking";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
@@ -27,7 +28,7 @@ const App = () => (
             {/* Public route - Auth page */}
             <Route path="/auth" element={<Auth />} />
             
-            {/* Protected routes without Layout */}
+            {/* Protected routes */}
             <Route
               path="/"
               element={
@@ -57,6 +58,14 @@ const App = () => (
               element={
                 <ProtectedRoute allowedRoles={["operator"]}>
                   <OperatorDashboard />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/operator/verify"
+              element={
+                <ProtectedRoute allowedRoles={["operator"]}>
+                  <VerifyBooking />
                 </ProtectedRoute>
               }
             />
