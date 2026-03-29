@@ -14,6 +14,7 @@ import OperatorProfile from "./pages/operator/OperatorProfile";
 import VerifyBooking from "./pages/operator/VerifyBooking";
 import MyBookings from "./pages/operator/MyBookings";
 import AdminDashboard from "./pages/admin/AdminDashboard";
+import AdminUsers from "./pages/admin/AdminUsers";
 import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
 
@@ -92,6 +93,14 @@ const App = () => (
               element={
                 <ProtectedRoute allowedRoles={["admin"]}>
                   <AdminDashboard />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/users"
+              element={
+                <ProtectedRoute allowedRoles={["admin"]}>
+                  <AdminUsers />
                 </ProtectedRoute>
               }
             />
