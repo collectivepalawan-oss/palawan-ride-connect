@@ -1,6 +1,6 @@
 import { Button } from "./ui/button";
 import { useAuth } from "@/contexts/AuthContext";
-import { Ship, Menu, LogOut, User, MapPin, Calendar } from "lucide-react";
+import { Ship, Menu, LogOut, User, MapPin, Calendar, Shield, Users } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import {
   DropdownMenu,
@@ -71,21 +71,44 @@ export const Navigation = () => {
                 )}
 
                 {userRole === "operator" && (
-                  <DropdownMenuItem asChild>
-                    <Link to="/operator" className="cursor-pointer">
-                      <Ship className="mr-2 h-4 w-4" />
-                      Operator Dashboard
-                    </Link>
-                  </DropdownMenuItem>
+                  <>
+                    <DropdownMenuItem asChild>
+                      <Link to="/operator" className="cursor-pointer">
+                        <Ship className="mr-2 h-4 w-4" />
+                        Operator Dashboard
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link to="/operator/profile" className="cursor-pointer">
+                        <User className="mr-2 h-4 w-4" />
+                        Operator Profile
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link to="/operator/bookings" className="cursor-pointer">
+                        <Calendar className="mr-2 h-4 w-4" />
+                        My Bookings
+                      </Link>
+                    </DropdownMenuItem>
+                  </>
                 )}
 
                 {userRole === "admin" && (
-                  <DropdownMenuItem asChild>
-                    <Link to="/admin" className="cursor-pointer">
-                      <Ship className="mr-2 h-4 w-4" />
-                      Admin Dashboard
-                    </Link>
-                  </DropdownMenuItem>
+                  <>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem asChild>
+                      <Link to="/admin" className="cursor-pointer">
+                        <Shield className="mr-2 h-4 w-4" />
+                        Admin Dashboard
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link to="/admin/users" className="cursor-pointer">
+                        <Users className="mr-2 h-4 w-4" />
+                        Manage Users
+                      </Link>
+                    </DropdownMenuItem>
+                  </>
                 )}
 
                 <DropdownMenuSeparator />
