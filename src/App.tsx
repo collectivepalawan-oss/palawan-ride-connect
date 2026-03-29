@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
+import { Layout } from "@/components/Layout";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import BookRide from "./pages/traveler/BookRide";
@@ -24,12 +25,17 @@ const App = () => (
       <BrowserRouter>
         <AuthProvider>
           <Routes>
+            {/* Public route - Auth page (no layout wrapper) */}
             <Route path="/auth" element={<Auth />} />
+            
+            {/* Protected routes with Layout wrapper */}
             <Route
               path="/"
               element={
                 <ProtectedRoute>
-                  <Index />
+                  <Layout>
+                    <Index />
+                  </Layout>
                 </ProtectedRoute>
               }
             />
@@ -37,7 +43,9 @@ const App = () => (
               path="/book"
               element={
                 <ProtectedRoute allowedRoles={["traveler"]}>
-                  <BookRide />
+                  <Layout>
+                    <BookRide />
+                  </Layout>
                 </ProtectedRoute>
               }
             />
@@ -45,7 +53,9 @@ const App = () => (
               path="/my-trips"
               element={
                 <ProtectedRoute allowedRoles={["traveler"]}>
-                  <MyTrips />
+                  <Layout>
+                    <MyTrips />
+                  </Layout>
                 </ProtectedRoute>
               }
             />
@@ -53,7 +63,9 @@ const App = () => (
               path="/operator"
               element={
                 <ProtectedRoute allowedRoles={["operator"]}>
-                  <OperatorDashboard />
+                  <Layout>
+                    <OperatorDashboard />
+                  </Layout>
                 </ProtectedRoute>
               }
             />
@@ -61,7 +73,9 @@ const App = () => (
               path="/admin"
               element={
                 <ProtectedRoute allowedRoles={["admin"]}>
-                  <AdminDashboard />
+                  <Layout>
+                    <AdminDashboard />
+                  </Layout>
                 </ProtectedRoute>
               }
             />
@@ -69,11 +83,22 @@ const App = () => (
               path="/profile"
               element={
                 <ProtectedRoute>
-                  <Profile />
+                  <Layout>
+                    <Profile />
+                  </Layout>
                 </ProtectedRoute>
               }
             />
-            <Route path="*" element={<NotFound />} />
+            
+            {/* 404 Not Found - with layout for consistent branding */}
+            <Route
+              path="*"
+              element={
+                <Layout>
+                  <NotFound />
+                </Layout>
+              }
+            />
           </Routes>
         </AuthProvider>
       </BrowserRouter>
