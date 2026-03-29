@@ -9,7 +9,7 @@ interface AuthContextType {
   userRole: string | null;
   loading: boolean;
   signIn: (email: string, password: string) => Promise<{ error: any }>;
-  signUp: (email: string, password: string, name: string, phone?: string) => Promise<{ error: any }>;
+  signUp: (email: string, password: string, name: string, phone: string, role: string) => Promise<{ error: any }>;
   signOut: () => Promise<void>;
 }
 
@@ -65,8 +65,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     return { error };
   };
 
-  const signUp = async (email: string, password: string, name: string, phone?: string) => {
-    const { error } = await authService.signUp(email, password, name, phone);
+  const signUp = async (email: string, password: string, name: string, phone: string, role: string = "traveler") => {
+    const { error } = await authService.signUp(email, password, name, phone, role);
     if (!error) {
       navigate("/");
     }
