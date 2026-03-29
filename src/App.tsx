@@ -11,6 +11,7 @@ import BookRide from "./pages/traveler/BookRide";
 import MyTrips from "./pages/traveler/MyTrips";
 import OperatorDashboard from "./pages/operator/OperatorDashboard";
 import VerifyBooking from "./pages/operator/VerifyBooking";
+import MyBookings from "./pages/operator/MyBookings";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
@@ -66,6 +67,14 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <VerifyBooking />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/operator/bookings"
+              element={
+                <ProtectedRoute>
+                  <MyBookings />
                 </ProtectedRoute>
               }
             />
