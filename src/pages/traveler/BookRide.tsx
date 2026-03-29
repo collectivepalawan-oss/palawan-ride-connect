@@ -122,6 +122,19 @@ const BookRide = () => {
 
       if (error) throw error;
 
+      // Send WhatsApp message to operator
+      const message = `New Booking:%0A
+Type: ${formData.transportType.replace("_", " ")}%0A
+From: ${formData.pickup}%0A
+To: ${formData.dropoff}%0A
+Date: ${format(date, "PPP")}%0A
+Time: ${formData.time}%0A
+Passengers: ${formData.passengers}%0A
+Price: ₱${priceEstimate.toLocaleString()}`;
+
+      const whatsappUrl = `https://wa.me/639474443597?text=${message}`;
+      window.open(whatsappUrl, "_blank");
+
       toast.success("Booking request submitted! Looking for available operators...");
       navigate("/my-trips");
     } catch (error: any) {
