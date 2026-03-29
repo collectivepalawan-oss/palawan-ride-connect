@@ -5,7 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { Ship, MapPin, Clock, CheckCircle, XCircle } from "lucide-react";
+import { Link } from "react-router-dom";
+import { Ship, MapPin, Clock, CheckCircle, XCircle, ClipboardList } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
@@ -140,6 +141,38 @@ const OperatorDashboard = () => {
             <p className="text-muted-foreground">Manage your rides and availability</p>
           </div>
 
+          {/* Quick Actions Grid */}
+          <div className="grid md:grid-cols-2 gap-4">
+            <Link to="/operator/verify">
+              <Card className="cursor-pointer hover:shadow-lg transition-shadow border-t-4 border-t-green-500">
+                <CardHeader>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <CardTitle>Verify Booking</CardTitle>
+                      <CardDescription>Enter PIN code to verify traveler bookings</CardDescription>
+                    </div>
+                    <Badge className="bg-green-500">Active</Badge>
+                  </div>
+                </CardHeader>
+              </Card>
+            </Link>
+
+            <Link to="/operator/bookings">
+              <Card className="cursor-pointer hover:shadow-lg transition-shadow border-t-4 border-t-blue-500">
+                <CardHeader>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <CardTitle>My Bookings</CardTitle>
+                      <CardDescription>View and manage your accepted bookings</CardDescription>
+                    </div>
+                    <ClipboardList className="h-8 w-8 text-blue-500" />
+                  </div>
+                </CardHeader>
+              </Card>
+            </Link>
+          </div>
+
+          {/* Operator Status Card */}
           <Card>
             <CardHeader>
               <div className="flex items-center justify-between">
@@ -171,6 +204,7 @@ const OperatorDashboard = () => {
             </CardContent>
           </Card>
 
+          {/* Pending Requests */}
           <div>
             <h2 className="text-2xl font-bold mb-4">Pending Requests</h2>
             {pendingBookings.length === 0 ? (
