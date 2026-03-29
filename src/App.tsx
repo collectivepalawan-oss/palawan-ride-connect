@@ -64,7 +64,7 @@ const App = () => (
             <Route
               path="/operator/verify"
               element={
-                <ProtectedRoute allowedRoles={["operator"]}>
+                <ProtectedRoute>
                   <VerifyBooking />
                 </ProtectedRoute>
               }
