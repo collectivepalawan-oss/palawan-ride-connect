@@ -15,7 +15,6 @@ export const authService = {
         },
       },
     });
-
     return { data, error };
   },
   signIn: async (email: string, password: string) => {
