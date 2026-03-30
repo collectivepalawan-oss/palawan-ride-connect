@@ -11,15 +11,9 @@ export const authService = {
         data: {
           name,
           phone,
+          role,
         },
       },
-    });
-
-    if (error || !data.user) return { data, error };
-
-    await supabase.from("user_roles").insert({
-      user_id: data.user.id,
-      role: role,
     });
 
     return { data, error };
