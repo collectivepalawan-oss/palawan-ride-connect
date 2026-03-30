@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
-import { supabase } from '@/lib/supabase';
+import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -40,7 +40,6 @@ export default function OperatorProfile() {
   const [licenseFile, setLicenseFile] = useState<File | null>(null);
   const [vehicleFiles, setVehicleFiles] = useState<File[]>([]);
 
-  // Load existing operator data
   useEffect(() => {
     if (user) {
       loadOperatorData();
@@ -126,7 +125,6 @@ export default function OperatorProfile() {
     e.preventDefault();
     setSaving(true);
     
-    // Upload images first
     const licenseUrl = await uploadLicenseImage();
     const vehicleUrls = await uploadVehiclePhotos();
     
@@ -181,7 +179,6 @@ export default function OperatorProfile() {
       <h1 className="text-2xl font-bold mb-6">Operator Profile</h1>
       
       <form onSubmit={handleSubmit} className="space-y-6">
-        {/* Basic Info */}
         <Card>
           <CardHeader>
             <CardTitle className="text-lg flex items-center gap-2">
@@ -199,7 +196,6 @@ export default function OperatorProfile() {
                 required
               />
             </div>
-
             <div className="space-y-2">
               <Label className="flex items-center gap-2">
                 <Phone className="h-4 w-4" />
@@ -216,7 +212,6 @@ export default function OperatorProfile() {
           </CardContent>
         </Card>
 
-        {/* Vehicle Info */}
         <Card>
           <CardHeader>
             <CardTitle className="text-lg">Vehicle Information</CardTitle>
@@ -293,7 +288,6 @@ export default function OperatorProfile() {
           </CardContent>
         </Card>
 
-        {/* Service Area */}
         <Card>
           <CardHeader>
             <CardTitle className="text-lg flex items-center gap-2">
@@ -318,7 +312,6 @@ export default function OperatorProfile() {
           </CardContent>
         </Card>
 
-        {/* License Upload */}
         <Card>
           <CardHeader>
             <CardTitle className="text-lg">License / Permit</CardTitle>
@@ -333,7 +326,6 @@ export default function OperatorProfile() {
                 />
               </div>
             )}
-            
             <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-primary transition-colors">
               <input
                 type="file"
@@ -352,13 +344,11 @@ export default function OperatorProfile() {
           </CardContent>
         </Card>
 
-        {/* Vehicle Photos */}
         <Card>
           <CardHeader>
             <CardTitle className="text-lg">Vehicle Photos</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            {/* Existing photos */}
             {formData.vehicle_photos.length > 0 && (
               <div className="grid grid-cols-3 gap-2">
                 {formData.vehicle_photos.map((url, index) => (
@@ -379,8 +369,6 @@ export default function OperatorProfile() {
                 ))}
               </div>
             )}
-            
-            {/* Upload new photos */}
             <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-primary transition-colors">
               <input
                 type="file"
