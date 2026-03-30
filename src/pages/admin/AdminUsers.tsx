@@ -33,7 +33,7 @@ export default function AdminUsers() {
     
     const { data: profiles, error: profilesError } = await supabase
       .from('profiles')
-      .select('id, full_name, phone, created_at');
+      .select('id, name, phone, created_at');
 
     if (profilesError) {
       toast.error('Failed to load users');
@@ -61,7 +61,7 @@ export default function AdminUsers() {
       return {
         id: profile.id,
         email: authUser?.email || 'N/A',
-        full_name: profile.full_name,
+        full_name: profile.name,
         phone: profile.phone,
         role: userRole?.role || 'traveler',
         created_at: profile.created_at
