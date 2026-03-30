@@ -12,6 +12,7 @@ const Auth = () => {
   const { signIn, signUp } = useAuth();
   const [loading, setLoading] = useState(false);
   const [role, setRole] = useState("traveler");
+  const [phoneNumber, setPhoneNumber] = useState("");
 
   const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -34,17 +35,26 @@ const Auth = () => {
     }
   };
 
+  const handlePhoneInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const digits = e.target.value.replace(/\D/g, '').slice(0, 10);
+    setPhoneNumber(digits);
+  };
+
   const handleSignUp = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
     const fullName = formData.get("fullName") as string;
-    const phone = formData.get("phone") as string;
     const email = formData.get("email") as string;
     const password = formData.get("password") as string;
     const confirmPassword = formData.get("confirmPassword") as string;
 
-    if (!fullName || !phone || !email || !password) {
+    if (!fullName || !phoneNumber || !email || !password) {
       toast.error("Please fill in all fields");
+      return;
+    }
+
+    if (phoneNumber.length < 9) {
+      toast.error("Please enter a valid phone number");
       return;
     }
 
@@ -53,9 +63,11 @@ const Auth = () => {
       return;
     }
 
+    const formattedPhone = `+63${phoneNumber}`;
+
     setLoading(true);
     try {
-      await signUp(email, password, fullName, phone, role);
+      await signUp(email, password, fullName, formattedPhone, role);
     } catch (error: any) {
       toast.error(error.message);
     } finally {
@@ -104,8 +116,22 @@ const Auth = () => {
                   <Input id="fullName" name="fullName" placeholder="Juan Dela Cruz" />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="phone">Phone Number</Label>
-                  <Input id="phone" name="phone" placeholder="09XX XXX XXXX" />
+                  <Label htmlFor="phone">WhatsApp Number</Label>
+                  <div className="flex">
+                    <span className="inline-flex items-center px-3 rounded-l-md border border-r-0 border-input bg-muted text-sm font-medium">
+                      +63
+                    </span>
+                    <Input
+                      id="phone"
+                      className="rounded-l-none"
+                      placeholder="9XX XXX XXXX"
+                      value={phoneNumber}
+                      onChange={handlePhoneInput}
+                      type="tel"
+                      inputMode="numeric"
+                    />
+                  </div>
+                  <p className="text-xs text-muted-foreground">Used for WhatsApp booking notifications</p>
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="email">Email</Label>
