@@ -3,6 +3,8 @@ import { Session, User } from "@supabase/supabase-js";
 
 export const authService = {
   signUp: async (email: string, password: string, name: string, phone?: string, role: string = "traveler") => {
+    console.log("SignUp called with:", { email, name, phone, role });
+    
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
@@ -15,6 +17,8 @@ export const authService = {
         },
       },
     });
+    
+    console.log("SignUp response:", { data, error });
     return { data, error };
   },
   signIn: async (email: string, password: string) => {
