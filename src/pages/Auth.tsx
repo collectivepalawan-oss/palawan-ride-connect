@@ -5,13 +5,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 
 const Auth = () => {
   const { signIn, signUp } = useAuth();
   const [loading, setLoading] = useState(false);
-  const [role, setRole] = useState("traveler");
   const [phoneNumber, setPhoneNumber] = useState("");
 
   const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -67,7 +65,7 @@ const Auth = () => {
 
     setLoading(true);
     try {
-      await signUp(email, password, fullName, formattedPhone, role);
+      await signUp(email, password, fullName, formattedPhone, "traveler");
     } catch (error: any) {
       toast.error(error.message);
     } finally {
@@ -136,18 +134,6 @@ const Auth = () => {
                 <div className="space-y-2">
                   <Label htmlFor="email">Email</Label>
                   <Input id="email" name="email" type="email" placeholder="your.email@example.com" />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="role">I want to sign up as</Label>
-                  <Select value={role} onValueChange={setRole}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select role" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="traveler">Traveler (Book rides)</SelectItem>
-                      <SelectItem value="operator">Operator (Manage bookings)</SelectItem>
-                    </SelectContent>
-                  </Select>
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="password">Password</Label>
