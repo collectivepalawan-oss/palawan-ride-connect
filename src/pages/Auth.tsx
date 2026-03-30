@@ -36,8 +36,7 @@ const Auth = () => {
   };
 
   const handlePhoneInput = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const digits = e.target.value.replace(/\D/g, '').slice(0, 10);
-    setPhoneNumber(digits);
+    setPhoneNumber(e.target.value);
   };
 
   const handleSignUp = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -47,14 +46,15 @@ const Auth = () => {
     const email = formData.get("email") as string;
     const password = formData.get("password") as string;
     const confirmPassword = formData.get("confirmPassword") as string;
+    const phone = formData.get("phone") as string;
 
-    if (!fullName || !phoneNumber || !email || !password) {
+    if (!fullName || !phone || !email || !password) {
       toast.error("Please fill in all fields");
       return;
     }
 
-    if (phoneNumber.length < 9) {
-      toast.error("Please enter a valid phone number");
+    if (!phone.match(/^\+[0-9]{10,15}$/)) {
+      toast.error("Please enter a valid phone number with country code (e.g., +639123456789)");
       return;
     }
 
@@ -63,11 +63,9 @@ const Auth = () => {
       return;
     }
 
-    const formattedPhone = `+63${phoneNumber}`;
-
     setLoading(true);
     try {
-      await signUp(email, password, fullName, formattedPhone, role);
+      await signUp(email, password, fullName, phone, role);
     } catch (error: any) {
       toast.error(error.message);
     } finally {
@@ -117,21 +115,17 @@ const Auth = () => {
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="phone">WhatsApp Number</Label>
-                  <div className="flex">
-                    <span className="inline-flex items-center px-3 rounded-l-md border border-r-0 border-input bg-muted text-sm font-medium">
-                      +63
-                    </span>
-                    <Input
-                      id="phone"
-                      className="rounded-l-none"
-                      placeholder="9XX XXX XXXX"
-                      value={phoneNumber}
-                      onChange={handlePhoneInput}
-                      type="tel"
-                      inputMode="numeric"
-                    />
-                  </div>
-                  <p className="text-xs text-muted-foreground">Used for WhatsApp booking notifications</p>
+                  <Input
+                    id="phone"
+                    name="phone"
+                    placeholder="+639123456789"
+                    value={phoneNumber}
+                    onChange={handlePhoneInput}
+                    type="tel"
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Include country code (e.g., +63 for Philippines, +1 for USA)
+                  </p>
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="email">Email</Label>
