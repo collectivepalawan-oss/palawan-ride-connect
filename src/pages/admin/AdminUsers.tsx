@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
-import { supabase } from '@/lib/supabase';
+import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -31,7 +31,6 @@ export default function AdminUsers() {
   const fetchUsers = async () => {
     setLoading(true);
     
-    // Get all profiles
     const { data: profiles, error: profilesError } = await supabase
       .from('profiles')
       .select('id, full_name, phone, created_at');
@@ -42,7 +41,6 @@ export default function AdminUsers() {
       return;
     }
 
-    // Get roles
     const { data: roles, error: rolesError } = await supabase
       .from('user_roles')
       .select('user_id, role');
@@ -53,13 +51,11 @@ export default function AdminUsers() {
       return;
     }
 
-    // Get emails via RPC
-    const { data: authUsers, error: authError } = await supabase
+    const { data: authUsers } = await supabase
       .rpc('get_users_with_emails');
 
-    // Combine data
-    const combinedUsers = profiles.map((profile: any) => {
-      const userRole = roles.find((r: any) => r.user_id === profile.id);
+    const combinedUsers = (profiles || []).map((profile: any) => {
+      const userRole = roles?.find((r: any) => r.user_id === profile.id);
       const authUser = authUsers?.find((u: any) => u.id === profile.id);
       
       return {
@@ -124,28 +120,26 @@ export default function AdminUsers() {
 
   const getRoleColor = (role: string) => {
     switch (role) {
-      case 'admin': return 'bg-red-100 text-red-800 border-red-200';
-      case 'operator': return 'bg-blue-100 text-blue-800 border-blue-200';
-      case 'traveler': return 'bg-green-100 text-green-800 border-green-200';
+      case 'admin': return 'bg-red-100 text-red-800';
+      case 'operator': return 'bg-blue-100 text-blue-800';
+      case 'traveler': return 'bg-green-100 text-green-800';
       default: return 'bg-gray-100 text-gray-800';
     }
   };
 
   return (
-    <div className="max-w-4xl mx-auto pb-20">
+    <div className="max-w-4xl mx-auto pb-20 p-4">
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold">User Management</h1>
-        <Badge variant="outline" className="bg-red-100 text-red-800">
-          Admin Only
-        </Badge>
+        <Badge className="bg-red-100 text-red-800">Admin Only</Badge>
       </div>
 
       <div className="space-y-4">
         {users.map((user) => (
           <Card key={user.id}>
             <CardContent className="p-4">
-              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <div className="flex-1">
+              <div className="flex flex-col gap-3">
+                <div>
                   <div className="flex items-center gap-2 mb-1">
                     <h3 className="font-semibold">{user.full_name}</h3>
                     <Badge className={getRoleColor(user.role)}>
@@ -158,7 +152,6 @@ export default function AdminUsers() {
                     Joined: {new Date(user.created_at).toLocaleDateString()}
                   </p>
                 </div>
-
                 <div className="flex items-center gap-2">
                   <Select 
                     value={user.role} 
@@ -173,7 +166,6 @@ export default function AdminUsers() {
                       <SelectItem value="admin">Admin</SelectItem>
                     </SelectContent>
                   </Select>
-
                   <Button 
                     variant="ghost" 
                     size="icon"
