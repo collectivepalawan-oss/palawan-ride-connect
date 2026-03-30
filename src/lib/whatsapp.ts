@@ -1,47 +1,175 @@
-// Generate WhatsApp click-to-chat links without API
-export const generateWhatsAppLink = (
-  phone: string, 
-  bookingCode: string,
-  type: 'operator_accept' | 'traveler_confirm' | 'admin_notify',
-  data: {
-    pickup: string;
-    dropoff: string;
-    price: number;
-    date: string;
-    time: string;
-  }
-) => {
-  // Format: 63XXXXXXXXX (Philippines format, no + or 0)
-  const formattedPhone = phone.replace(/\D/g, '').replace(/^0/, '63');
-  
-  const messages = {
-    operator_accept: `🚗 NEW BOOKING ${bookingCode}\n\n` +
-      `📍 From: ${data.pickup}\n` +
-      `📍 To: ${data.dropoff}\n` +
-      `📅 ${data.date} at ${data.time}\n` +
-      `💰 ₱${data.price.toLocaleString()}\n\n` +
-      `Reply YES to accept or NO to decline`,
-      
-    traveler_confirm: `✅ BOOKING CONFIRMED ${bookingCode}\n\n` +
-      `Your ride has been accepted!\n` +
-      `Driver will contact you shortly.\n\n` +
-      `Track: ${window.location.origin}/track/${bookingCode}`,
-      
-    admin_notify: `📊 ADMIN ALERT\n\n` +
-      `Booking ${bookingCode} requires attention\n` +
-      `Route: ${data.pickup} → ${data.dropoff}`
+import { useState } from "react";
+import { useAuth } from "@/contexts/AuthContext";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { toast } from "sonner";
+
+const Auth = () => {
+  const { signIn, signUp } = useAuth();
+  const [loading, setLoading] = useState(false);
+  const [role, setRole] = useState("traveler");
+  const [phoneNumber, setPhoneNumber] = useState("");
+
+  const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    const email = formData.get("email") as string;
+    const password = formData.get("password") as string;
+
+    if (!email || !password) {
+      toast.error("Please fill in all fields");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      await signIn(email, password);
+    } catch (error: any) {
+      toast.error(error.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const encodedMessage = encodeURIComponent(messages[type]);
-  return `https://wa.me/${formattedPhone}?text=${encodedMessage}`;
+  const handlePhoneInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+    // Only allow digits, max 10 digits (after +63)
+    const digits = e.target.value.replace(/\D/g, '').slice(0, 10);
+    setPhoneNumber(digits);
+  };
+
+  const handleSignUp = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    const fullName = formData.get("fullName") as string;
+    const email = formData.get("email") as string;
+    const password = formData.get("password") as string;
+    const confirmPassword = formData.get("confirmPassword") as string;
+
+    if (!fullName || !phoneNumber || !email || !password) {
+      toast.error("Please fill in all fields");
+      return;
+    }
+
+    if (phoneNumber.length < 9) {
+      toast.error("Please enter a valid phone number");
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      toast.error("Passwords do not match");
+      return;
+    }
+
+    // Format as +639XXXXXXXXX for WhatsApp
+    const formattedPhone = `+63${phoneNumber}`;
+
+    setLoading(true);
+    try {
+      await signUp(email, password, fullName, formattedPhone, role);
+    } catch (error: any) {
+      toast.error(error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white flex items-center justify-center px-4">
+      <Card className="w-full max-w-md shadow-xl">
+        <CardHeader className="text-center">
+          <CardTitle className="text-3xl font-bold text-primary">
+            Palawan Collective Transport
+          </CardTitle>
+          <p className="text-sm text-muted-foreground mt-2">
+            Your journey across paradise starts here
+          </p>
+        </CardHeader>
+        <CardContent>
+          <Tabs defaultValue="login" className="w-full">
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="login">Login</TabsTrigger>
+              <TabsTrigger value="signup">Sign Up</TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="login">
+              <form onSubmit={handleLogin} className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="email">Email</Label>
+                  <Input id="email" name="email" type="email" placeholder="your.email@example.com" />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="password">Password</Label>
+                  <Input id="password" name="password" type="password" />
+                </div>
+                <Button type="submit" className="w-full" disabled={loading}>
+                  {loading ? "Signing in..." : "Sign In"}
+                </Button>
+              </form>
+            </TabsContent>
+
+            <TabsContent value="signup">
+              <form onSubmit={handleSignUp} className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="fullName">Full Name</Label>
+                  <Input id="fullName" name="fullName" placeholder="Juan Dela Cruz" />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="phone">WhatsApp Number</Label>
+                  <div className="flex">
+                    <span className="inline-flex items-center px-3 rounded-l-md border border-r-0 border-input bg-muted text-sm font-medium">
+                      +63
+                    </span>
+                    <Input
+                      id="phone"
+                      name="phone"
+                      className="rounded-l-none"
+                      placeholder="9XX XXX XXXX"
+                      value={phoneNumber}
+                      onChange={handlePhoneInput}
+                      type="tel"
+                      inputMode="numeric"
+                    />
+                  </div>
+                  <p className="text-xs text-muted-foreground">Used for WhatsApp booking notifications</p>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="email">Email</Label>
+                  <Input id="email" name="email" type="email" placeholder="your.email@example.com" />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="role">I want to sign up as</Label>
+                  <Select value={role} onValueChange={setRole}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select role" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="traveler">Traveler (Book rides)</SelectItem>
+                      <SelectItem value="operator">Operator (Manage bookings)</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="password">Password</Label>
+                  <Input id="password" name="password" type="password" />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="confirmPassword">Confirm Password</Label>
+                  <Input id="confirmPassword" name="confirmPassword" type="password" />
+                </div>
+                <Button type="submit" className="w-full" disabled={loading}>
+                  {loading ? "Creating account..." : "Create Account"}
+                </Button>
+              </form>
+            </TabsContent>
+          </Tabs>
+        </CardContent>
+      </Card>
+    </div>
+  );
 };
 
-// Generate verification code
-export const generateBookingCode = () => {
-  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // No confusing chars
-  let code = 'PRC-';
-  for (let i = 0; i < 5; i++) {
-    code += chars.charAt(Math.floor(Math.random() * chars.length));
-  }
-  return code;
-};
+export default Auth;
