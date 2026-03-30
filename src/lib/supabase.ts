@@ -24,7 +24,6 @@ export const authService = {
 
     return { data, error };
   },
-
   signIn: async (email: string, password: string) => {
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
@@ -32,17 +31,14 @@ export const authService = {
     });
     return { data, error };
   },
-
   signOut: async () => {
     const { error } = await supabase.auth.signOut();
     return { error };
   },
-
   getSession: async (): Promise<{ session: Session | null; error: any }> => {
     const { data, error } = await supabase.auth.getSession();
     return { session: data.session, error };
   },
-
   onAuthStateChange: (callback: (session: Session | null, user: User | null) => void) => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (_event, session) => {
@@ -51,7 +47,6 @@ export const authService = {
     );
     return subscription;
   },
-
   getUserRole: async (userId: string) => {
     const { data, error } = await supabase
       .from("user_roles")
@@ -59,7 +54,7 @@ export const authService = {
       .eq("user_id", userId)
       .order("created_at", { ascending: false })
       .limit(1);
-
+    
     if (error) return { role: null, error };
     return { role: data?.[0]?.role || null, error: null };
   },
