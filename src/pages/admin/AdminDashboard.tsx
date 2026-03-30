@@ -92,9 +92,29 @@ const AdminDashboard = () => {
   const updateUserRole = async (userId: string, newRole: string) => {
     setUpdating(true);
     
-    const { error } = await supabase
+    // First check if user already has a role
+    const { data: existing } = await supabase
       .from("user_roles")
-      .upsert({ user_id: userId, role: newRole }, { onConflict: "user_id" });
+      .select("id")
+      .eq("user_id", userId)
+      .maybeSingle();
+    
+    let error;
+    
+    if (existing) {
+      // Update existing role
+      const { error: updateError } = await supabase
+        .from("user_roles")
+        .update({ role: newRole })
+        .eq("user_id", userId);
+      error = updateError;
+    } else {
+      // Insert new role
+      const { error: insertError } = await supabase
+        .from("user_roles")
+        .insert({ user_id: userId, role: newRole });
+      error = insertError;
+    }
     
     if (error) {
       toast.error("Failed to update role");
@@ -191,7 +211,7 @@ const AdminDashboard = () => {
                           <div className="flex-1">
                             <p className="font-semibold">{user.name}</p>
                             <p className="text-sm text-muted-foreground">{user.email}</p>
-                            <p className="text-sm text-muted-foreground">{user.phone}</p>
+                            {user.phone && <p className="text-sm text-muted-foreground">{user.phone}</p>}
                             <p className="text-xs text-muted-foreground mt-1">
                               Joined: {new Date(user.created_at).toLocaleDateString()}
                             </p>
