@@ -2,7 +2,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Session, User } from "@supabase/supabase-js";
 
 export const authService = {
-  signUp: async (email: string, password: string, name: string, phone?: string) => {
+  signUp: async (email: string, password: string, name: string, phone?: string, role: string = "traveler") => {
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
@@ -14,9 +14,17 @@ export const authService = {
         },
       },
     });
+
+    if (error || !data.user) return { data, error };
+
+    // Save role to user_roles table
+    await supabase.from("user_roles").insert({
+      user_id: data.user.id,
+      role: role,
+    });
+
     return { data, error };
   },
-
   signIn: async (email: string, password: string) => {
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
@@ -24,17 +32,14 @@ export const authService = {
     });
     return { data, error };
   },
-
   signOut: async () => {
     const { error } = await supabase.auth.signOut();
     return { error };
   },
-
   getSession: async (): Promise<{ session: Session | null; error: any }> => {
     const { data, error } = await supabase.auth.getSession();
     return { session: data.session, error };
   },
-
   onAuthStateChange: (callback: (session: Session | null, user: User | null) => void) => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (_event, session) => {
@@ -43,7 +48,6 @@ export const authService = {
     );
     return subscription;
   },
-
   getUserRole: async (userId: string) => {
     const { data, error } = await supabase
       .from("user_roles")
